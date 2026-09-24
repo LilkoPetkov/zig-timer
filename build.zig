@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -31,12 +32,26 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    exe.root_module.linkFramework("Cocoa", .{});
-    exe.root_module.linkFramework("CoreFoundation", .{});
-    exe.root_module.linkFramework("IOKit", .{});
-    exe.root_module.linkFramework("CoreVideo", .{});
-    exe.root_module.linkFramework("OpenGL", .{});
-    exe.root_module.linkFramework("QuartzCore", .{});
+    if (builtin.target.os.tag.isDarwin()) {
+        exe.root_module.linkFramework("Cocoa", .{});
+        exe.root_module.linkFramework("CoreFoundation", .{});
+        exe.root_module.linkFramework("IOKit", .{});
+        exe.root_module.linkFramework("CoreVideo", .{});
+        exe.root_module.linkFramework("OpenGL", .{});
+        exe.root_module.linkFramework("QuartzCore", .{});
+    } else {
+        exe.root_module.linkSystemLibrary("GL", .{});
+        exe.root_module.linkSystemLibrary("X11", .{});
+        exe.root_module.linkSystemLibrary("Xrandr", .{});
+        exe.root_module.linkSystemLibrary("Xinerama", .{});
+        exe.root_module.linkSystemLibrary("Xi", .{});
+        exe.root_module.linkSystemLibrary("Xcursor", .{});
+
+        exe.root_module.linkSystemLibrary("m", .{});
+        exe.root_module.linkSystemLibrary("pthread", .{});
+        exe.root_module.linkSystemLibrary("dl", .{});
+        exe.root_module.linkSystemLibrary("rt", .{});
+    }
 
     exe.root_module.addObjectFile(b.path("raylib/src/libraylib.a"));
 
